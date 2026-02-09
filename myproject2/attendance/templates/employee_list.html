@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+         /* Navbar */
+        .navbar {
+            background-color: #111827;
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            margin: 0;
+        }
+
+        .navbar a {
+            color: #d1d5db;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+        }
+
+        .navbar a:hover {
+            color: white;
+        }
+
+
+        header, footer {
+            text-align: center;
+            padding: 20px;
+            background: #4a6ba7;
+            color: white;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .add-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background: #5f6cc1;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: 0.3s;
+        }
+
+        .add-btn:hover {
+            background: #4c4eaa;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #f0f0f0;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .actions a {
+            margin-right: 8px;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .btn-view {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .btn-update {
+            background: #f59e0b;
+            color: #0b1220;
+        }
+
+        .btn-delete {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #777;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+<div class="navbar">
+    <h2>Admin Panel</h2>
+    <div>
+        <a href="{% url 'home' %}">Dashboard</a>
+        <a href="{% url 'add_employee' %}">Add Employee</a>
+        <a href="{% url 'employee_list' %}">Employee List</a>
+        <a href="#">Attendance</a>
+        <a href="#">Logout</a>
+    </div>
+</div>
+
+<header>
+    <h1>Employee Management System</h1>
+    <p>View and manage employees</p>
+</header>
+
+<div class="container">
+    <h2>Employee List</h2>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <a href="{% url 'add_employee' %}" class="add-btn">+ Add Employee</a>
+        <div>
+            <label for="statusFilter" style="margin-right:8px;font-weight:600;color:#333">Filter:</label>
+            <select id="statusFilter" aria-label="Filter by status">
+                <option value="all">All</option>
+                <option value="enabled">Enabled</option>
+                <option value="disabled">Disabled</option>
+            </select>
+        </div>
+    </div>
+
+    <table id="employeesTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Phone</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employee in employees %}
+            <tr>
+                <td>{{ employee.name }}</td>
+                <td>{{ employee.department }}</td>
+                <td>{{ employee.email }}</td>
+                <td>{{ employee.status }}</td>
+                <td>{{ employee.phone_number }}</td>
+               <td class="actions">
+                    <a href="{% url 'employee_view' employee.id %}" class="btn-view">View</a>
+                    <a href="{% url 'employee_update' employee.id %}" class="btn-update">Update</a>
+                    <a href="{% url 'employee_delete' employee.id %}" class="btn-delete">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="no-data">No employees found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    (function(){
+        var select = document.getElementById('statusFilter');
+        var table = document.getElementById('employeesTable');
+        if(!select || !table) return;
+
+        select.addEventListener('change', function(){
+            var val = this.value;
+            var rows = table.tBodies[0].rows;
+            for(var i=0;i<rows.length;i++){
+                var statusCell = rows[i].cells[3];
+                if(!statusCell) continue;
+                var text = statusCell.textContent.trim().toLowerCase();
+                if(val === 'all'){
+                    rows[i].style.display = '';
+                } else if(val === 'enabled'){
+                    rows[i].style.display = (text.indexOf('enable') !== -1 || text === 'true' || text === '1') ? '' : 'none';
+                } else if(val === 'disabled'){
+                    rows[i].style.display = (text.indexOf('disable') !== -1 || text === 'false' || text === '0') ? '' : 'none';
+                }
+            }
+        });
+    })();
+</script>
+</div>
+
+</body>
+</html>
