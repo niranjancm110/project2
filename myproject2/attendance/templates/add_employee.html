@@ -8,11 +8,11 @@
         html,body{height:100%;margin:0;background:var(--bg);font-family:Inter, Arial, sans-serif;color:#0b1220}
 
         /* Top navigation */
-        .nav{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:var(--nav);border-bottom:1px solid #eef2f7;position:sticky;top:0;z-index:20}
-        .brand{font-weight:700;font-size:18px}
-        .nav-links{display:flex;gap:12px}
-        .nav-links a{color:var(--muted);text-decoration:none;padding:8px 10px;border-radius:8px;font-weight:600}
-        .nav-links a:hover{background:#eef6ff;color:var(--accent)}
+        .nav{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 25px;background:#111827;border-bottom:1px solid #1f2937;position:sticky;top:0;z-index:20}
+        .brand{font-weight:700;font-size:18px;color:white}
+        .nav-links{display:flex;gap:20px}
+        .nav-links a{color:#d1d5db;text-decoration:none;padding:8px 0;border-radius:0;font-weight:500}
+        .nav-links a:hover{color:white;background:none}
 
         /* Content */
         .container{max-width:640px;margin:28px auto;padding:26px;background:var(--card);border-radius:10px;border:1px solid #e6eef8}
@@ -40,9 +40,10 @@
     <div class="brand">Office</div>
     <nav class="nav-links">
         <a href="{% url 'home' %}">Dashboard</a>
-        <a href="{% url 'add_employee' %}">Add</a>
-        <a href="{% url 'employee_list' %}">Employees</a>
-        <a href="#">Attendance</a>
+        <a href="{% url 'add_employee' %}">Add Employee</a>
+        <a href="{% url 'employee_list' %}">Employee List</a>
+        <a href="{% url 'punch_attendance' %}">Punch In/Out</a>
+        <a href="{% url 'logout' %}">Logout</a>
     </nav>
 </header>
 

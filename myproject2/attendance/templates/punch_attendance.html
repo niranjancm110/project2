@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punch In/Out - Attendance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f9;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #111827;
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            margin: 0;
+        }
+
+        .navbar a {
+            color: #d1d5db;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+        }
+
+        .navbar a:hover {
+            color: white;
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+        }
+
+        h1 {
+            color: #111827;
+            margin-bottom: 30px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        /* Punch Card */
+        .punch-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .punch-card h2 {
+            color: #374151;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+
+        .time-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #2563eb;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+
+        .status-active {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .status-inactive {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Stats Card */
+        .stats-card {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-item {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            color: #111827;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .stat-value.hours {
+            color: #2563eb;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        .btn-punch-in {
+            background-color: #16a34a;
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-punch-in:hover {
+            background-color: #15803d;
+        }
+
+        .btn-punch-out {
+            background-color: #dc2626;
+            color: white;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-punch-out:hover {
+            background-color: #b91c1c;
+        }
+
+        .btn-secondary {
+            background-color: #e5e7eb;
+            color: #374151;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d1d5db;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #111827;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #374151;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .modal-footer .btn {
+            flex: 0;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+
+        .close-modal {
+            background-color: #e5e7eb;
+            color: #374151;
+        }
+
+        .confirm-modal {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .confirm-modal:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* Messages */
+        .message {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+            display: block;
+        }
+
+        .error-message {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+            display: block;
+        }
+
+        /* No Data */
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .time-display {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <h2>Attendance System</h2>
+    <div>
+        <a href="{% url 'employee_dashboard' %}">Dashboard</a>
+        <a href="{% url 'punch_attendance' %}">Punch In/Out</a>
+        <a href="">Reports</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+</div>
+
+<!-- Main Container -->
+<div class="container">
+    <h1>Punch In/Out System</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="grid">
+        <!-- Punch Card -->
+        <div class="punch-card">
+            <h2>Current Punch Status</h2>
+            
+            <div class="stat-label" style="margin-bottom: 10px;">Today's Date</div>
+            <p id="todayDate" style="color: #111827; font-size: 16px; font-weight: 600; margin-bottom: 20px;">-</p>
+            
+            {% if today_attendance %}
+                <div class="status-badge status-active">🟢 PUNCHED IN</div>
+                <div class="stat-label" style="margin-top: 20px;">Punch In Time</div>
+                <div class="time-display">{{ today_attendance.start_time|time:"H:i" }}</div>
+                
+                <div style="margin-top: 20px;">
+                    <div class="stat-label">Current Time</div>
+                    <div class="time-display" id="currentTime">--:--</div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <div class="stat-label">Time Elapsed</div>
+                    <div class="time-display" id="timeElapsed" style="font-size: 32px;">--:--</div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-punch-out" onclick="openPunchOutModal()">🛑 Punch Out</button>
+                    <a href="{% url 'employee_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            {% else %}
+                <div class="status-badge status-inactive">⭕ NOT PUNCHED IN</div>
+                <div style="margin-top: 20px;">
+                    <div class="stat-label">Next Action</div>
+                    <p style="color: #374151; margin: 10px 0; font-size: 16px;">Click Punch In to start your work day</p>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-punch-in" onclick="openPunchInModal()">✓ Punch In</button>
+                    <a href="{% url 'employee_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Stats Card -->
+        <div class="stats-card">
+            <h2 style="margin-bottom: 20px; color: #374151;">Today's Summary</h2>
+            
+            {% if today_attendance %}
+                <div class="stat-item">
+                    <div class="stat-label">Employee ID</div>
+                    <div class="stat-value">#{{ today_attendance.employee.id }}</div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-label">Employee Name</div>
+                    <div class="stat-value">{{ today_attendance.employee.name }}</div>
+                </div>
+
+                <div class="stat-item">
+                    <div class="stat-label">Punch In Time</div>
+                    <div class="stat-value">{{ today_attendance.start_time|time:"H:i:s" }}</div>
+                </div>
+
+                {% if today_attendance.end_time %}
+                    <div class="stat-item">
+                        <div class="stat-label">Punch Out Time</div>
+                        <div class="stat-value">{{ today_attendance.end_time|time:"H:i:s" }}</div>
+                    </div>
+
+                    <div class="stat-item">
+                        <div class="stat-label">Total Work Hours</div>
+                        <div class="stat-value hours">{{ today_attendance.work_hours }} hrs</div>
+                    </div>
+                {% else %}
+                    <div class="stat-item">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-value" style="color: #16a34a;">IN PROGRESS</div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="no-data">
+                    <p style="font-size: 16px; margin-bottom: 10px;">No punch records for today</p>
+                    <p style="font-size: 14px; color: #9ca3af;">Click "Punch In" to start tracking your attendance</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Punch In Modal -->
+<div id="punchInModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">✓ Punch In</div>
+        <div class="modal-body">
+            <p>Ready to punch in?</p>
+            <p style="margin-top: 15px; font-size: 14px;">
+                <strong>Employee ID:</strong> #<span id="employeeId">-</span>
+            </p>
+            <p style="font-size: 14px;">
+                <strong>Punch In Time:</strong> <span id="punchInTime">--:--</span>
+            </p>
+            <p style="font-size: 14px;">
+                <strong>Date:</strong> <span id="punchInDate">-</span>
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn close-modal" onclick="closePunchInModal()">Cancel</button>
+            <form method="POST" action="{% url 'punch_in' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn confirm-modal">Confirm Punch In</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Punch Out Modal -->
+<div id="punchOutModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">🛑 Punch Out</div>
+        <div class="modal-body">
+            <p>Ready to punch out?</p>
+            <p style="margin-top: 15px; font-size: 14px;">
+                <strong>Punch Out Time:</strong> <span id="punchOutTime">--:--</span>
+            </p>
+            <p style="font-size: 14px;">
+                <strong>Date:</strong> <span id="punchOutDate">-</span>
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn close-modal" onclick="closePunchOutModal()">Cancel</button>
+            <form method="POST" action="{% url 'punch_out' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn confirm-modal">Confirm Punch Out</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Update current time display
+    function updateCurrentTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        const timeDisplay = document.getElementById('currentTime');
+        if (timeDisplay) {
+            timeDisplay.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+
+        // Update punch in/out modal times
+        document.getElementById('punchInTime').textContent = `${hours}:${minutes}:${seconds}`;
+        document.getElementById('punchOutTime').textContent = `${hours}:${minutes}:${seconds}`;
+
+        // Set dates
+        const today = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('punchInDate').textContent = today;
+        document.getElementById('punchOutDate').textContent = today;
+        document.getElementById('todayDate').textContent = today;
+    }
+
+    // Update time elapsed
+    function updateTimeElapsed() {
+        const startTimeStr = '{{ today_attendance.start_time|time:"H:i" }}';
+        if (!startTimeStr || startTimeStr === '--' || startTimeStr.includes('--')) return;
+
+        const [startHours, startMinutes] = startTimeStr.split(':').map(Number);
+        const now = new Date();
+        
+        const startDate = new Date();
+        startDate.setHours(startHours, startMinutes, 0);
+        
+        const elapsed = now - startDate;
+        const totalSeconds = Math.floor(elapsed / 1000);
+        
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        
+        const elapsedDisplay = document.getElementById('timeElapsed');
+        if (elapsedDisplay) {
+            elapsedDisplay.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+    }
+
+    // Modal functions
+    function openPunchInModal() {
+        document.getElementById('employeeId').textContent = '{{ user.employee.id|default:"?" }}';
+        updateCurrentTime();
+        document.getElementById('punchInModal').style.display = 'block';
+    }
+
+    function closePunchInModal() {
+        document.getElementById('punchInModal').style.display = 'none';
+    }
+
+    function openPunchOutModal() {
+        updateCurrentTime();
+        document.getElementById('punchOutModal').style.display = 'none';
+        document.getElementById('punchOutModal').style.display = 'block';
+    }
+
+    function closePunchOutModal() {
+        document.getElementById('punchOutModal').style.display = 'none';
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const punchInModal = document.getElementById('punchInModal');
+        const punchOutModal = document.getElementById('punchOutModal');
+        
+        if (event.target === punchInModal) {
+            punchInModal.style.display = 'none';
+        }
+        if (event.target === punchOutModal) {
+            punchOutModal.style.display = 'none';
+        }
+    };
+
+    // Initialize and update times
+    updateCurrentTime();
+    updateTimeElapsed();
+    
+    setInterval(updateCurrentTime, 1000);
+    setInterval(updateTimeElapsed, 1000);
+</script>
+
+</body>
+</html>

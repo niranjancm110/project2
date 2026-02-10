@@ -12,6 +12,31 @@
             padding: 0;
         }
 
+        /* Navbar */
+        .navbar {
+            background-color: #111827;
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            margin: 0;
+        }
+
+        .navbar a {
+            color: #d1d5db;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+        }
+
+        .navbar a:hover {
+            color: white;
+        }
+
         header, footer {
             text-align: center;
             padding: 20px;
@@ -89,6 +114,18 @@
 </head>
 
 <body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <h2>Edit Employee</h2>
+    <div>
+        <a href="{% url 'home' %}">Dashboard</a>
+        <a href="{% url 'add_employee' %}">Add Employee</a>
+        <a href="{% url 'employee_list' %}">Employee List</a>
+        <a href="{% url 'punch_attendance' %}">Punch In/Out</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+</div>
 
 <header>
     <h1>Edit Employee</h1>

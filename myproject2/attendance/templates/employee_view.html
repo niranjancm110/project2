@@ -115,11 +115,11 @@
         }
 
         .btn.secondary {
-            background-color: #6b7280;
+            background-color: #0755f0;
         }
 
         .btn.secondary:hover {
-            background-color: #4b5563;
+            background-color: #166ae0;
         }
 
         .btn.danger {
@@ -151,7 +151,7 @@
 
         .no-data {
             text-align: center;
-            color: #6b7280;
+            color: #1f66f2;
             padding: 40px;
         }
     </style>
@@ -162,11 +162,11 @@
 <div class="navbar">
     <h2>Admin Panel</h2>
     <div>
-        <a href="#">Dashboard</a>
+        <a href="{% url 'home' %}">Dashboard</a>
         <a href="{% url 'add_employee' %}">Add Employee</a>
         <a href="{% url 'employee_list' %}">Employee List</a>
-        <a href="#">Attendance</a>
-        <a href="#">Logout</a>
+        <a href="{% url 'punch_attendance' %}">Punch In/Out</a>
+        <a href="{% url 'logout' %}">Logout</a>
     </div>
 </div>
 
@@ -206,11 +206,6 @@
                 <p>{{ employee.date_of_joining|date:"M d, Y"|default:"Not specified" }}</p>
             </div>
 
-            <div class="field">
-                <label>Salary</label>
-                <p>{{ employee.salary|default:"Not specified" }}</p>
-            </div>
-
             {% if employee.address %}
             <div class="field">
                 <label>Address</label>
@@ -221,8 +216,6 @@
     </div>
 
     <div class="actions">
-        <a href="{% url 'employee_update' employee.id %}" class="btn">Edit Employee</a>
-        <a href="{% url 'employee_delete' employee.id %}" class="btn danger">Delete Employee</a>
         <a href="{% url 'employee_list' %}" class="btn secondary">Back to List</a>
     </div>
 

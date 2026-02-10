@@ -207,8 +207,8 @@
     <h2>Employee Portal</h2>
     <div>
         <a href="{% url 'employee_dashboard' %}">Dashboard</a>
-        <a href="">Attendance</a>
-        <a href="">Reports</a>
+        <a href="{% url 'punch_attendance' %}">Punch In/Out</a>
+        <a href="{% url 'attendance_history' %}">Attendance History</a>
         <a href="{% url 'logout' %}">Logout</a>
     </div>
 </div>
@@ -234,15 +234,45 @@
             <h3>Absent Days</h3>
             <p class="absent">{{ absent_count|default:0 }}</p>
         </div>
-        <div class="card">
-            <h3>Late Arrivals</h3>
-            <p class="pending">{{ late_count|default:0 }}</p>
-        </div>
+
         <div class="card">
             <h3>Total Days</h3>
             <p>{{ total_count|default:0 }}</p>
         </div>
     </div>
+
+    <!-- Today's Attendance Status -->
+    {% if today_attendance %}
+        <div class="info-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-top: 30px; margin-bottom: 30px;">
+            <h2 style="color: white; margin-bottom: 20px;">📍 Today's Attendance Status</h2>
+            <div class="info-grid">
+                <div class="info-item" style="border-bottom-color: rgba(255,255,255,0.2);">
+                    <label style="color: rgba(255,255,255,0.9);">Status</label>
+                    <p style="color: white; font-size: 20px;">
+                        {% if today_attendance.end_time %}
+                            ✓ Punched Out
+                        {% else %}
+                            🟢 Currently Punched In
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="info-item" style="border-bottom-color: rgba(255,255,255,0.2);">
+                    <label style="color: rgba(255,255,255,0.9);">Punch In Time</label>
+                    <p style="color: white;">{{ today_attendance.start_time|time:"H:i:s" }}</p>
+                </div>
+                {% if today_attendance.end_time %}
+                    <div class="info-item" style="border-bottom-color: rgba(255,255,255,0.2);">
+                        <label style="color: rgba(255,255,255,0.9);">Punch Out Time</label>
+                        <p style="color: white;">{{ today_attendance.end_time|time:"H:i:s" }}</p>
+                    </div>
+                    <div class="info-item">
+                        <label style="color: rgba(255,255,255,0.9);">Total Work Hours</label>
+                        <p style="color: white; font-size: 20px; font-weight: bold;">{{ today_attendance.work_hours }} hrs</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
 
     <!-- Employee Information -->
     <div class="info-card">
@@ -260,14 +290,7 @@
                 <label>Phone</label>
                 <p>{{ employee.phone_number }}</p>
             </div>
-            <div class="info-item">
-                <label>Position</label>
-                <p>{{ employee.position|default:"Not specified" }}</p>
-            </div>
-            <div class="info-item">
-                <label>Date of Joining</label>
-                <p>{{ employee.date_of_joining|date:"M d, Y"|default:"Not specified" }}</p>
-            </div>
+        
             <div class="info-item">
                 <label>Employee ID</label>
                 <p>#{{ employee.id }}</p>
@@ -277,8 +300,10 @@
 
     <!-- Actions -->
     <div class="actions">
+        <a href="{% url 'punch_attendance' %}" class="btn" style="background-color: #10b981;">⏱️ Punch In/Out</a>
         <a href="{% url 'employee_view' employee.id %}" class="btn">View Full Profile</a>
-        <a href="" class="btn secondary">Download Report</a>
+        <a href="{% url 'attendance_history' %}" class="btn secondary">Attendance History</a>
+        <a href="{% url 'logout' %}" class="btn secondary">Logout</a>
     </div>
 </div>
 

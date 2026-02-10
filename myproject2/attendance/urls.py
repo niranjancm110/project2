@@ -11,9 +11,15 @@ urlpatterns = [
     path("employee_dashboard/", views.employee_dashboard, name="employee_dashboard"),
     path("employee_update/<int:employee_id>/", views.employee_update, name="employee_update"),
     path("employee_delete/<int:employee_id>/", views.employee_delete, name="employee_delete"),
+    path("attendance/", views.mark_attendance, name="mark_attendance"),
+    path("punch/", views.punch_attendance, name="punch_attendance"),
+    path("punch_in/", views.punch_in, name="punch_in"),
+    path("punch_out/", views.punch_out, name="punch_out"),
+    path("attendance_history/", views.attendance_history, name="attendance_history"),
     path("", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
     
     
 ]
+
 

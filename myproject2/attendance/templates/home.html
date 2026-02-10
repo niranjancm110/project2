@@ -130,11 +130,11 @@
 <div class="navbar">
     <h2>Admin Panel</h2>
     <div>
-        <a href="#">Dashboard</a>
-        <a href="{% url 'add_employee' %}">Employees</a>
+        <a href="{% url 'home' %}">Dashboard</a>
+        <a href="{% url 'add_employee' %}">Add Employees</a>
         <a href="{% url 'employee_list' %}">Employee List</a>
-        <a href="#">Attendance</a>
-        <a href="#">Logout</a>
+        <a href="{% url 'punch_attendance' %}">Punch In/Out</a>
+        <a href="{% url 'logout' %}">Logout</a>
     </div>
 </div>
 
