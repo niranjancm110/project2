@@ -16,6 +16,7 @@ urlpatterns = [
     path("punch_in/", views.punch_in, name="punch_in"),
     path("punch_out/", views.punch_out, name="punch_out"),
     path("attendance_history/", views.attendance_history, name="attendance_history"),
+    path("admin_attendance/", views.admin_attendance_view, name="admin_attendance"),
     path("", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
     

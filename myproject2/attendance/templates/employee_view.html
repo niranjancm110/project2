@@ -203,7 +203,7 @@
             
             <div class="field">
                 <label>Date of Joining</label>
-                <p>{{ employee.date_of_joining|date:"M d, Y"|default:"Not specified" }}</p>
+                <p>{{ employee.join_date|date:"M d, Y"|default:"Not specified" }}</p>
             </div>
 
             {% if employee.address %}

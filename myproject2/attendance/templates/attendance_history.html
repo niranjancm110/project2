@@ -8,14 +8,41 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
+            margin: 0;
             background:#ccc;
             min-height: 100vh;
-            padding: 20px 0;
+            padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #111827;
+            color: white;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar h2 {
+            margin: 0;
+        }
+
+        .navbar a {
+            color: #d1d5db;
+            text-decoration: none;
+            margin-left: 20px;
+            font-weight: 500;
+        }
+
+        .navbar a:hover {
+            color: white;
         }
 
         .container {
             max-width: 1000px;
+            padding: 20px 0;
         }
 
         .page-header {
@@ -283,6 +310,17 @@
     </style>
 </head>
 <body>
+<!-- Navbar -->
+<div class="navbar">
+    <h2>Employee Portal</h2>
+    <div>
+        <a href="{% url 'employee_dashboard' %}">Dashboard</a>
+        <a href="{% url 'punch_attendance' %}">Punch In/Out</a>
+        <a href="{% url 'attendance_history' %}">Attendance History</a>
+        <a href="{% url 'logout' %}">Logout</a>
+    </div>
+</div>
+
     <div class="container">
         <!-- Page Header -->
         <div class="page-header">
@@ -341,7 +379,7 @@
 
         <!-- Attendance Records Table -->
         <div class="card">
-            <div class="card-header">
+            <div class="card-header" >
                 <h5><i class="fas fa-list"></i> Attendance Records</h5>
             </div>
             <div class="table-responsive">
@@ -352,7 +390,7 @@
                             <th><i class="fas fa-calendar"></i> Date</th>
                             <th><i class="fas fa-sign-in-alt"></i> Start Time</th>
                             <th><i class="fas fa-sign-out-alt"></i> End Time</th>
-                            <th><i class="fas fa-hourglass-half"></i> Work Hours</th>
+                            <!-- <th><i class="fas fa-hourglass-half"></i> Work Hours</th> -->
                             <th><i class="fas fa-info-circle"></i> Status</th>
                             <th><i class="fas fa-sticky-note"></i> Notes</th>
                         </tr>
@@ -379,7 +417,7 @@
                                     <span class="badge bg-warning text-dark">Not Punched Out</span>
                                 {% endif %}
                             </td>
-                            <td>
+                            <!-- <td>
                                 {% if record.work_hours %}
                                     <span class="hours-badge">
                                         {{ record.work_hours }} hrs
@@ -387,7 +425,7 @@
                                 {% else %}
                                     <span class="hours-badge">—</span>
                                 {% endif %}
-                            </td>
+                            </td> -->
                             <td>
                                 {% if record.end_time %}
                                     <span class="badge-present">

@@ -265,8 +265,9 @@ def punch_out(request):
                 attendance.save()
                 
                 # Calculate work hours
-                work_hours = attendance.work_hours
-                messages.success(request, f'✓ Punched out at {current_time.strftime("%H:%M:%S")}. Total work hours: {work_hours} hrs')
+                # work_hours = attendance.work_hours
+                messages.success(request, f'✓ Punched out at {current_time.strftime("%H:%M:%S")}. ')
+                # Total work hours: {work_hours} hrs
         except Employee.DoesNotExist:
             messages.error(request, 'You do not have an employee profile. Please contact admin.')
         except Exception as e:
@@ -317,3 +318,57 @@ def attendance_history(request):
     except Exception as e:
         messages.error(request, f'Error loading attendance history: {str(e)}')
         return redirect('employee_dashboard')
+
+
+def admin_attendance_view(request):
+    """Admin view to see attendance of all employees"""
+    # Check if user is admin
+    if not request.user.is_authenticated or request.user.role != 'Admin':
+        messages.error(request, 'You do not have permission to access this page.')
+        return redirect('login')
+    
+    # Get all employees
+    employees = Employee.objects.all().order_by('name')
+    
+    # Build employee data with attendance stats
+    employee_data = []
+    total_present_all = 0
+    total_absent_all = 0
+    total_days_all = 0
+    
+    for employee in employees:
+        attendance_records = Attendance.objects.filter(employee=employee).order_by('-date')
+        
+        total_days = attendance_records.count()
+        present_count = attendance_records.filter(end_time__isnull=False).count()
+        absent_count = attendance_records.filter(end_time__isnull=True).count()
+        
+        # Calculate attendance percentage
+        if total_days > 0:
+            attendance_percentage = round((present_count / total_days) * 100, 2)
+        else:
+            attendance_percentage = 0
+        
+        # Accumulate totals
+        total_present_all += present_count
+        total_absent_all += absent_count
+        total_days_all += total_days
+        
+        employee_data.append({
+            'employee': employee,
+            'total_days': total_days,
+            'present_count': present_count,
+            'absent_count': absent_count,
+            'attendance_percentage': attendance_percentage,
+        })
+    
+    
+    context = {
+        'employee_data': employee_data,
+        'total_employees': len(employees),
+        'total_present': total_present_all,
+        'total_absent': total_absent_all,
+       
+    }
+    
+    return render(request, 'admin_attendance.html', context)

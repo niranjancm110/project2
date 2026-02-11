@@ -224,22 +224,7 @@
         </span>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="cards">
-        <div class="card">
-            <h3>Present Days</h3>
-            <p class="presence">{{ present_count|default:0 }}</p>
-        </div>
-        <div class="card">
-            <h3>Absent Days</h3>
-            <p class="absent">{{ absent_count|default:0 }}</p>
-        </div>
-
-        <div class="card">
-            <h3>Total Days</h3>
-            <p>{{ total_count|default:0 }}</p>
-        </div>
-    </div>
+    
 
     <!-- Today's Attendance Status -->
     {% if today_attendance %}
@@ -302,8 +287,6 @@
     <div class="actions">
         <a href="{% url 'punch_attendance' %}" class="btn" style="background-color: #10b981;">⏱️ Punch In/Out</a>
         <a href="{% url 'employee_view' employee.id %}" class="btn">View Full Profile</a>
-        <a href="{% url 'attendance_history' %}" class="btn secondary">Attendance History</a>
-        <a href="{% url 'logout' %}" class="btn secondary">Logout</a>
     </div>
 </div>
 

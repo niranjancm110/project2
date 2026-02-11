@@ -77,18 +77,18 @@ class Attendance(models.Model):
         verbose_name_plural = "Attendance"
         ordering = ['-date']
 
-    @property
-    def work_hours(self):
-        """Calculate total work hours"""
-        if self.start_time and self.end_time:
-            from datetime import datetime, timedelta
-            # Create datetime objects for calculation
-            start = datetime.combine(self.date, self.start_time)
-            end = datetime.combine(self.date, self.end_time)
-            duration = end - start
-            hours = duration.total_seconds() / 3600
-            return round(hours, 2)
-        return None
+    # @property
+    # def work_hours(self):
+    #     """Calculate total work hours"""
+    #     if self.start_time and self.end_time:
+    #         from datetime import datetime, timedelta
+    #         # Create datetime objects for calculation
+    #         start = datetime.combine(self.date, self.start_time)
+    #         end = datetime.combine(self.date, self.end_time)
+    #         duration = end - start
+    #         hours = duration.total_seconds() / 3600
+    #         return round(hours, 2)
+    #     return None
 
     @property
     def is_punched_in(self):
