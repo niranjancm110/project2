@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - All Employee Attendance</title>
+    <title>Admin - All Attendance Records</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -127,77 +127,36 @@
             color: #111827;
         }
 
-        .emp-department {
+        .emp-date {
             color: #667eea;
             font-weight: 500;
         }
 
-        .stat-center {
-            text-align: center;
+        .time-badge {
+            background: #e7f3ff;
+            color: #0066cc;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
             font-weight: 600;
+            display: inline-block;
         }
 
-        .stat-present {
-            color: #28a745;
-            font-weight: 700;
-        }
-
-        .stat-absent {
-            color: #dc3545;
-            font-weight: 700;
-        }
-
-        .stat-total {
-            color: #667eea;
-            font-weight: 700;
-        }
-
-        .percentage-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .percentage-value {
-            font-weight: 700;
-            color: #667eea;
-            min-width: 45px;
-        }
-
-        .percentage-bar {
-            flex: 1;
-            height: 6px;
-            background-color: #e5e7eb;
-            border-radius: 3px;
-            overflow: hidden;
-            min-width: 100px;
-        }
-
-        .percentage-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #28a745 0%, #20c997 100%);
-            transition: width 0.3s ease;
-        }
-
-        .status-enabled {
+        .status-present {
             background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
             color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: inline-block;
         }
 
-        .status-disabled {
-            background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+        .status-absent {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
             color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: inline-block;
         }
 
         .action-buttons {
@@ -223,68 +182,6 @@
             margin-bottom: 15px;
         }
 
-        .summary-section {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 1400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-        }
-
-        .summary-item {
-            text-align: center;
-        }
-
-        .summary-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #667eea;
-        }
-
-        .summary-label {
-            color: #6b7280;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            margin-top: 8px;
-        }
-
-        .search-section {
-            max-width: 1400px;
-            margin: 0 auto 20px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 2px solid white;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            background: white;
-            color: #111827;
-        }
-
-        .search-input::placeholder {
-            color: #9ca3af;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
         @media (max-width: 768px) {
             .header-section h1 {
                 font-size: 1.8rem;
@@ -294,18 +191,6 @@
             .attendance-table tbody td {
                 padding: 12px 8px;
                 font-size: 0.85rem;
-            }
-
-            .percentage-bar {
-                min-width: 60px;
-            }
-
-            .summary-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .search-section {
-                flex-direction: column;
             }
 
             .action-buttons {
@@ -327,74 +212,79 @@
     <div>
         <a href="{% url 'home' %}">Dashboard</a>
         <a href="{% url 'employee_list' %}">Employees</a>
-        <a href="{% url 'admin_attendance' %}">Attendance</a>
+        <a href="{% url 'attendance_history' %}">Attendance History</a>
         <a href="{% url 'logout' %}">Logout</a>
     </div>
 </div>
 
 <!-- Header Section -->
 <div class="header-section">
-    <h1><i class="fas fa-chart-bar"></i> All Employee Attendance</h1>
+    <h1><i class="fas fa-history"></i> All Attendance Records</h1>
+    <p class="info">View and manage all employee attendance records</p>
 </div>
 
 <!-- Main Content -->
 <div class="page-container">
-    <!-- Summary Section -->
-    
-  
-
     <!-- Table Container -->
     <div class="table-container">
-        {% if employee_data %}
+        {% if attendance_records %}
             <div class="table-wrapper">
                 <table class="attendance-table" id="attendanceTable">
                     <thead>
                         <tr>
                             <th>Employee Name</th>
                             <th>Department</th>
-                            <th>start_time</th>
-                            <th>end_time</th>
-                            <th style="text-align: center;">Total Days</th>
-                            <th style="text-align: center;">Present</th>
-                            <th style="text-align: center;">Absent</th>
-                            <th style="text-align: center;">Attendance %</th>
-                            <th style="text-align: center;">Status</th>
+                            <th>Date</th>
+                            <th>Punch In</th>
+                            <th>Punch Out</th>
+                            <th>Status</th>
                             <th style="text-align: center;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for emp_data in employee_data %}
+                        {% for record in attendance_records %}
                             <tr>
                                 <td>
-                                    <div class="emp-name">{{ emp_data.employee.name }}</div>
-                                    <small style="color: #9ca3af;">ID: #{{ emp_data.employee.user_id }}</small>
+                                    <div class="emp-name">{{ record.employee.name }}</div>
+                                    <small style="color: #9ca3af;">ID: #{{ record.employee.user_id }}</small>
                                 </td>
                                 <td>
-                                    <span class="emp-department">{{ emp_data.employee.department }}</span>
+                                    <span style="color: #667eea; font-weight: 500;">{{ record.employee.department }}</span>
                                 </td>
-                                <td>{{ emp_data.attendance_records.first.start_time }}</td>
-                                <td>{{ emp_data.attendance_records.first.end_time }}</td>
-                                <td class="stat-center stat-total">{{ emp_data.total_days }}</td>
-                                <td class="stat-center stat-present">{{ emp_data.present_count }}</td>
-                                <td class="stat-center stat-absent">{{ emp_data.absent_count }} </td>
-                                <td class="stat-center">
-                                    <div class="percentage-container">
-                                        <div class="percentage-value">{{ emp_data.attendance_percentage }}%</div>
-                                    </div>
+                                <td>
+                                    <span class="emp-date">{{ record.date|date:"Y-m-d" }}</span>
                                 </td>
-                                <td class="stat-center">
-                                    {% if emp_data.employee.status == 'Enabled' or emp_data.employee.status == 'enabled' %}
-                                        <span class="status-enabled"><i class="fas fa-check-circle"></i> Enabled</span>
+                                <td>
+                                    {% if record.start_time %}
+                                        <span class="time-badge">{{ record.start_time|date:"H:i" }}</span>
                                     {% else %}
-                                        <span class="status-disabled"><i class="fas fa-times-circle"></i> Disabled</span>
+                                        <span style="color: #999;">-</span>
                                     {% endif %}
                                 </td>
-                                <td class="stat-center">
+                                <td>
+                                    {% if record.end_time %}
+                                        <span class="time-badge">{{ record.end_time|date:"H:i" }}</span>
+                                    {% else %}
+                                        <span style="color: #999;">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if record.end_time %}
+                                        <span class="status-badge status-present">
+                                            <i class="fas fa-check-circle"></i> Present
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge status-absent">
+                                            <i class="fas fa-exclamation-circle"></i> Incomplete
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
                                     <div class="action-buttons">
-                                        <a href="{% url 'update_attendance' emp_data.employee.id %}" class="btn btn-primary btn-sm">
+                                        <a href="{% url 'update_attendance' record.id %}" class="btn btn-primary btn-sm" title="Edit">
                                             <i class="fas fa-edit"></i> Edit
                                         </a>
-                                      <a href="{% url 'delete_attendance_history' emp_data.employee.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this attendance record?')">
+                                        <a href="{% url 'delete_attendance_history' record.employee.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this record?')" title="Delete">
                                             <i class="fas fa-trash"></i> Delete
                                         </a>
                                     </div>
@@ -406,8 +296,8 @@
             </div>
         {% else %}
             <div class="no-data">
-                <i class="fas fa-user-slash"></i>
-                <p style="font-size: 1.1rem; margin-top: 10px;">No employees found</p>
+                <i class="fas fa-inbox"></i>
+                <p style="font-size: 1.1rem; margin-top: 10px;">No attendance records found</p>
             </div>
         {% endif %}
     </div>

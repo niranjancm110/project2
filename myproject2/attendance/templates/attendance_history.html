@@ -312,23 +312,35 @@
 <body>
 <!-- Navbar -->
 <div class="navbar">
-    <h2>Employee Portal</h2>
-    <div>
-        <a href="{% url 'employee_dashboard' %}">Dashboard</a>
-        <a href="{% url 'punch_attendance' %}">Punch In/Out</a>
-        <a href="{% url 'attendance_history' %}">Attendance History</a>
-        <a href="{% url 'logout' %}">Logout</a>
-    </div>
+    {% if user.role == 'Admin' %}
+        <h2>Admin Portal</h2>
+        <div>
+            <a href="{% url 'home' %}">Dashboard</a>
+            <a href="{% url 'employee_list' %}">Employees</a>
+            <a href="{% url 'admin_attendance' %}">Attendance</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
+    {% else %}
+        <h2>Employee Portal</h2>
+        <div>
+            <a href="{% url 'employee_dashboard' %}">Dashboard</a>
+            <a href="{% url 'punch_attendance' %}">Punch In/Out</a>
+            <a href="{% url 'attendance_history' %}">Attendance History</a>
+            <a href="{% url 'logout' %}">Logout</a>
+        </div>
+    {% endif %}
 </div>
 
     <div class="container">
+        {% csrf_token %}
         <!-- Page Header -->
         <div class="page-header">
             <h1><i class="fas fa-clock"></i> Attendance History</h1>
-            <p>View your attendance records and statistics</p>
+            <p>View {% if user.role == 'Admin' and user != employee.user %} {{ employee.name }}'s {% else %} your {% endif %} attendance records and statistics</p>
         </div>
-
+       
         <!-- Employee Information -->
+       {% if user.role == 'Employee' %}
         <div class="employee-info">
             <div class="row">
                 <div class="col-md-6">
@@ -341,6 +353,22 @@
                 </div>
             </div>
         </div>
+        {% endif %}
+
+         <!-- Action Buttons -->
+         <!-- <div class="button-group" style="margin-bottom: 30px;">
+            <a href="{% url 'punch_attendance' %}" class="btn btn-custom btn-primary-custom">
+                <i class="fas fa-clock"></i> Punch Attendance
+            </a>
+            {% if user.role == 'Admin' %}
+            <a href="{% url 'employee_dashboard' %}" class="btn btn-custom" style="background: white; color: #667eea; border: 2px solid #667eea;">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            {% else %}
+            <a href="{% url 'employee_dashboard' %}" class="btn btn-custom" style="background: white; color: #667eea; border: 2px solid #667eea;">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            {% endif %} -->
 
         <!-- Statistics Cards -->
         <div class="stats-container">
@@ -390,56 +418,73 @@
                             <th><i class="fas fa-calendar"></i> Date</th>
                             <th><i class="fas fa-sign-in-alt"></i> Start Time</th>
                             <th><i class="fas fa-sign-out-alt"></i> End Time</th>
-                            <!-- <th><i class="fas fa-hourglass-half"></i> Work Hours</th> -->
                             <th><i class="fas fa-info-circle"></i> Status</th>
-                            <th><i class="fas fa-sticky-note"></i> Notes</th>
+                            {% if user.role == 'Admin' %}
+                            <th><i class="fas fa-cogs"></i> Actions</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for record in attendance_records %}
-                        <tr>
+                        <tr data-record-id="{{ record.id }}">
                             <td>
-                                <strong>{{ record.date|date:"d M Y" }}</strong>
-                                <br>
-                                <small>{{ record.date|date:"l" }}</small>
+                                <span class="display-date">
+                                    <strong>{{ record.date|date:"d M Y" }}</strong>
+                                    <br>
+                                    <small>{{ record.date|date:"l" }}</small>
+                                </span>
+                                <input type="date" class="form-control edit-date d-none" value="{{ record.date|date:'Y-m-d' }}">
                             </td>
                             <td>
-                                <span class="time-badge">
+                                <span class="display-start-time time-badge">
                                     {{ record.start_time|time:"H:i" }}
                                 </span>
+                                <input type="time" class="form-control edit-start-time d-none" value="{{ record.start_time|time:'H:i' }}">
                             </td>
                             <td>
+                                <span class="display-end-time">
+                                    {% if record.end_time %}
+                                        <span class="time-badge">{{ record.end_time|time:"H:i" }}</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Not Punched Out</span>
+                                    {% endif %}
+                                </span>
                                 {% if record.end_time %}
-                                    <span class="time-badge">
-                                        {{ record.end_time|time:"H:i" }}
-                                    </span>
+                                <input type="time" class="form-control edit-end-time d-none" value="{{ record.end_time|time:'H:i' }}">
                                 {% else %}
-                                    <span class="badge bg-warning text-dark">Not Punched Out</span>
-                                {% endif %}
-                            </td>
-                            <!-- <td>
-                                {% if record.work_hours %}
-                                    <span class="hours-badge">
-                                        {{ record.work_hours }} hrs
-                                    </span>
-                                {% else %}
-                                    <span class="hours-badge">—</span>
-                                {% endif %}
-                            </td> -->
-                            <td>
-                                {% if record.end_time %}
-                                    <span class="badge-present">
-                                        <i class="fas fa-check"></i> Present
-                                    </span>
-                                {% else %}
-                                    <span class="badge-absent">
-                                        <i class="fas fa-times"></i> Absent
-                                    </span>
+                                <input type="time" class="form-control edit-end-time d-none" value="">
                                 {% endif %}
                             </td>
                             <td>
-                                <small>{{ record.notes|truncatewords:5 }}</small>
+                                <span class="display-status">
+                                    {% if record.end_time %}
+                                        <span class="badge-present">
+                                            <i class="fas fa-check"></i> Present
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-absent">
+                                            <i class="fas fa-times"></i> Absent
+                                        </span>
+                                    {% endif %}
+                                </span>
+                                <select class="form-control edit-status d-none">
+                                    <option value="present" {% if record.end_time %}selected{% endif %}>Present</option>
+                                    <option value="absent" {% if not record.end_time %}selected{% endif %}>Absent</option>
+                                </select>
                             </td>
+                            {% if user.role == 'Admin' %}
+                            <td>
+                                <button class="btn btn-sm btn-primary edit-btn">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-sm btn-success save-btn d-none">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                <button class="btn btn-sm btn-secondary cancel-btn d-none">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -492,6 +537,85 @@
             }
         `;
         document.head.appendChild(style);
+
+        // Inline editing functionality
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.edit-btn')) {
+                const row = e.target.closest('tr');
+                const recordId = row.dataset.recordId;
+                
+                // Hide display elements, show edit inputs
+                row.querySelectorAll('.display-date, .display-start-time, .display-end-time, .display-status').forEach(el => el.classList.add('d-none'));
+                row.querySelectorAll('.edit-date, .edit-start-time, .edit-end-time, .edit-status').forEach(el => el.classList.remove('d-none'));
+                
+                // Hide edit button, show save/cancel
+                row.querySelector('.edit-btn').classList.add('d-none');
+                row.querySelector('.save-btn').classList.remove('d-none');
+                row.querySelector('.cancel-btn').classList.remove('d-none');
+            }
+            
+            if (e.target.closest('.cancel-btn')) {
+                const row = e.target.closest('tr');
+                
+                // Show display elements, hide edit inputs
+                row.querySelectorAll('.display-date, .display-start-time, .display-end-time, .display-status').forEach(el => el.classList.remove('d-none'));
+                row.querySelectorAll('.edit-date, .edit-start-time, .edit-end-time, .edit-status').forEach(el => el.classList.add('d-none'));
+                
+                // Show edit button, hide save/cancel
+                row.querySelector('.edit-btn').classList.remove('d-none');
+                row.querySelector('.save-btn').classList.add('d-none');
+                row.querySelector('.cancel-btn').classList.add('d-none');
+                
+                // Reset form values to original
+                location.reload(); // Simple way to reset
+            }
+            
+            if (e.target.closest('.save-btn')) {
+                const row = e.target.closest('tr');
+                const recordId = row.dataset.recordId;
+
+                const date = row.querySelector('.edit-date').value;
+                const startTime = row.querySelector('.edit-start-time').value;
+                const endTime = row.querySelector('.edit-end-time').value;
+                const status = row.querySelector('.edit-status').value;
+
+                // Confirm before submitting
+                if (!confirm('Are you sure you want to submit these changes?')) {
+                    return;
+                }
+
+                // Send AJAX request to update
+                fetch(`/attendance/update_attendance/${recordId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams({
+                        'date': date,
+                        'start_time': startTime,
+                        'end_time': endTime,
+                        'status': status,
+                        'notes': ''
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Show confirmation popup then reload
+                        alert('Attendance updated successfully.');
+                        location.reload();
+                    } else {
+                        alert('Error updating attendance: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error updating attendance');
+                });
+            }
+        });
     </script>
 </body>
 </html>

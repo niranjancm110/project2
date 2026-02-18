@@ -1,5 +1,5 @@
 
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth import logout, authenticate, login
 from django import forms
@@ -64,7 +64,11 @@ def employee_view(request, employee_id):
 
 def employee_dashboard(request):
     # Get the employee associated with the logged-in user
-    employee = request.user.employee
+    try:
+        employee = request.user.employee
+    except:
+        messages.error(request, 'You do not have an employee profile. Please contact admin.')
+        return redirect('login')
     
     # Get today's attendance
     today = date.today()
@@ -278,46 +282,110 @@ def punch_out(request):
 
 @login_required(login_url='login')
 def attendance_history(request):
-    """Display attendance history with statistics"""
+    """Display attendance history for admin (all records) or employee (their records)"""
     try:
-        employee = request.user.employee
-        if not employee:
-            messages.error(request, 'You do not have an employee profile. Please contact admin.')
-            return redirect('employee_dashboard')
+        # Check if user is Admin
+        is_admin = hasattr(request.user, 'role') and request.user.role == 'Admin'
         
-        # Get all attendance records for this employee, sorted by date
-        attendance_records = Attendance.objects.filter(
-            employee=employee
-        ).order_by('-date')
-        
-        # Calculate statistics
-        total_days = attendance_records.count()
-        present_count = attendance_records.filter(end_time__isnull=False).count()
-        absent_count = attendance_records.filter(end_time__isnull=True).count()
-        
-        # Calculate attendance percentage
-        if total_days > 0:
-            attendance_percentage = round((present_count / total_days) * 100, 2)
+        if is_admin:
+            # Admin viewing all attendance records
+            attendance_records = Attendance.objects.all().order_by('-date')
+            context = {
+                'attendance_records': attendance_records,
+                'is_admin': True,
+            }
         else:
-            attendance_percentage = 0
-        
-        context = {
-            'employee': employee,
-            'attendance_records': attendance_records,
-            'total_days': total_days,
-            'present_count': present_count,
-            'absent_count': absent_count,
-            'attendance_percentage': attendance_percentage,
-        }
+            # Employee viewing their own history
+            try:
+                employee = request.user.employee
+            except:
+                messages.error(request, 'You do not have an employee profile. Please contact admin.')
+                return redirect('employee_dashboard')
+            
+            # Get all attendance records for this employee, sorted by date
+            attendance_records = Attendance.objects.filter(
+                employee=employee
+            ).order_by('-date')
+            
+            # Calculate statistics
+            total_days = attendance_records.count()
+            present_count = attendance_records.filter(end_time__isnull=False).count()
+            absent_count = attendance_records.filter(end_time__isnull=True).count()
+            
+            # Calculate attendance percentage
+            if total_days > 0:
+                attendance_percentage = round((present_count / total_days) * 100, 2)
+            else:
+                attendance_percentage = 0
+            
+            context = {
+                'employee': employee,
+                'attendance_records': attendance_records,
+                'total_days': total_days,
+                'present_count': present_count,
+                'absent_count': absent_count,
+                'attendance_percentage': attendance_percentage,
+            }
         
         return render(request, 'attendance_history.html', context)
     
-    except Employee.DoesNotExist:
-        messages.error(request, 'You do not have an employee profile. Please contact admin.')
-        return redirect('employee_dashboard')
     except Exception as e:
         messages.error(request, f'Error loading attendance history: {str(e)}')
-        return redirect('employee_dashboard')
+        return HttpResponse(f'Error: {str(e)}')
+
+
+def delete_attendance_history(request, employee_id):
+    """Delete all attendance records for a specific employee (Admin only)"""
+    print(f"Deleting attendance history for employee ID: {employee_id}")
+    if request.user.role != 'Admin':
+        messages.error(request, 'Access denied.')
+        return redirect('home')
+    
+    try:
+        employee = Employee.objects.get(id=employee_id)
+        Attendance.objects.filter(employee=employee).delete()
+        messages.success(request, f'All attendance records for {employee.name} have been deleted.')
+    except Employee.DoesNotExist:
+        messages.error(request, 'Employee not found.')
+    except Exception as e:
+        messages.error(request, f'Error deleting attendance records: {str(e)}')
+    
+    return redirect('admin_attendance')
+
+
+def update_attendance(request, attendance_id):
+    """Update a specific attendance record (Admin only)"""
+    if request.user.role != 'Admin':
+        print(f"Unauthorized access attempt by user: {request.user.username} with role: {request.user.role}")
+        messages.error(request, 'Access denied.')
+        return redirect('home')
+  
+    try:
+        attendance = Attendance.objects.get(employee_id=attendance_id)
+        print(f"Updating attendance record ID: {attendance_id} for employee: {attendance.employee.name}")
+        if request.method == 'POST':
+            # Update fields based on form input
+            attendance.date = request.POST.get('date', attendance.date)
+            attendance.start_time = request.POST.get('start_time', attendance.start_time)
+            attendance.end_time = request.POST.get('end_time', attendance.end_time)
+           
+            attendance.save()
+            messages.success(request, 'Attendance record updated successfully.')
+            return redirect('attendance_history')
+        
+        context = {
+            'attendance': attendance,
+            'employee': attendance.employee
+        }
+        return render(request, 'update_attendance.html', context)
+    
+    except Attendance.DoesNotExist:
+        messages.error(request, 'Attendance record not found.')
+        return redirect('admin_attendance')
+    except Exception as e:
+        messages.error(request, f'Error updating attendance record: {str(e)}')
+        return HttpResponse(f'Error: {str(e)}')
+    
 
 
 def admin_attendance_view(request):
@@ -356,6 +424,7 @@ def admin_attendance_view(request):
         
         employee_data.append({
             'employee': employee,
+            'attendance_records': attendance_records,
             'total_days': total_days,
             'present_count': present_count,
             'absent_count': absent_count,
@@ -365,6 +434,7 @@ def admin_attendance_view(request):
     
     context = {
         'employee_data': employee_data,
+
         'total_employees': len(employees),
         'total_present': total_present_all,
         'total_absent': total_absent_all,
