@@ -25,6 +25,8 @@ def is_superuser(view_func):
 #------------------------------------------------------------------------
 
 #Admin dashboard view
+@login_required
+@is_superuser
 def home(request):
     return render(request, "home.html")
 
@@ -72,6 +74,7 @@ def employee_view(request, employee_id):
     return render(request, 'employee_view.html', {'employee': employee})
 
 #employee dashboard view
+@login_required
 def employee_dashboard(request):
     try:
         employee = request.user.employee
@@ -155,7 +158,7 @@ def logout_view(request):
     logout(request)
     return redirect('login')
 
-
+@login_required
 def mark_attendance(request):
     if request.method == "POST":
         employee_id = request.POST.get('employee_id')
@@ -449,6 +452,8 @@ def admin_attendance_view(request):
     }
     
     return render(request, 'admin_attendance.html', context)
+@login_required
+@is_superuser
 def admin_attendance_history_view(request):
     """Admin view to see attendance history of all employees"""
     if not request.user.is_authenticated or request.user.role != 'Admin':
