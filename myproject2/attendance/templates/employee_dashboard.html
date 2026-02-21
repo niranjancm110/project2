@@ -284,10 +284,23 @@
     </div>
 
     <!-- Actions -->
-    <div class="actions">
-        <a href="{% url 'punch_attendance' %}" class="btn" style="background-color: #10b981;">⏱️ Punch In/Out</a>
-        <a href="{% url 'employee_view' employee.id %}" class="btn">View Full Profile</a>
-    </div>
+ <div class="actions">
+    {% if is_finished_for_day %}
+        <button class="btn secondary" style="cursor: not-allowed; opacity: 0.6;" disabled>
+            ✅ Shift Completed for Today
+        </button>
+    {% else %}
+        <a href="{% url 'punch_attendance' %}" class="btn" style="background-color: #10b981;">
+            {% if today_attendance %}
+                ⏱️ Punch Out
+            {% else %}
+                ⏱️ Punch In
+            {% endif %}
+        </a>
+    {% endif %}
+
+    <a href="{% url 'employee_view' employee.id %}" class="btn">View Full Profile</a>
+</div>
 </div>
 
 </body>

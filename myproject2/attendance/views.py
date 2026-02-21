@@ -35,13 +35,16 @@ def home(request):
 def add_employee_view(request):
     if request.method == "POST":
         form = EmployeeForm(request.POST)
-
+        username = request.POST.get('username')
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Username already exists. Please choose a different username.')
+            return render(request, 'add_employee.html', {'form': form, 'error': 'Username already exists. Please choose a different username.'})
         if form.is_valid():
           
             user = User.objects.create(
                 username=form.cleaned_data['username'],
                 password=make_password(form.cleaned_data['password']),
-                role=form.cleaned_data['role']
+                role=form.cleaned_data['role'],
             )
 
          
@@ -53,6 +56,7 @@ def add_employee_view(request):
 
     else:
         form = EmployeeForm()
+        
 
     return render(request, 'add_employee.html', {'form': form})
 
@@ -71,7 +75,7 @@ def employee_view(request, employee_id):
 def employee_dashboard(request):
     try:
         employee = request.user.employee
-    except:
+    except AttributeError:
         messages.error(request, 'You do not have an employee profile. Please contact admin.')
         return redirect('login')
     
@@ -80,10 +84,17 @@ def employee_dashboard(request):
         employee=employee,
         date=today
     ).first()
+
+    # Determine if the button should be disabled
+    # If they punched out (end_time exists), they are done for the day.
+    is_finished_for_day = False
+    if today_attendance and today_attendance.end_time:
+        is_finished_for_day = True
     
     context = {
         'employee': employee,
         'today_attendance': today_attendance,
+        'is_finished_for_day': is_finished_for_day, # Added this
         'present_count': 0, 
         'absent_count': 0,
         'late_count': 0,
@@ -124,14 +135,16 @@ def login_view(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
         user=authenticate(request,username=username,password=password)
+      
         if user is  None:
             return render(request, 'login.html', {'error': 'Invalid credentials.'})
         login(request,user)
-        print(user.role)
+        employee = Employee.objects.filter(user=user).first()
+        print(employee)
         if user and user.check_password(password) and user.role == 'Admin':
           
             return redirect('home')
-        elif user and user.check_password(password) and user.role == 'Employee' and user.employee.status == 'Enabled':
+        elif user and user.check_password(password) and user.role == 'Employee' and employee.status == 'Enabled':
             return redirect('employee_dashboard')
         else:
             return render(request, 'login.html', {'error': 'Invalid credentials or inactive account.'})
@@ -185,19 +198,16 @@ def mark_attendance(request):
 # Punch in/out views
 @login_required(login_url='login')
 def punch_attendance(request):
-    """Display punch in/out page"""
-
     today = date.today()
     
     try:
         employee = request.user.employee
-        # Get the active punch in record (end_time is null)
+        # Look for ANY attendance record for today
         today_attendance = Attendance.objects.filter(
             employee=employee,
-            date=today,
-            end_time__isnull=True
+            date=today
         ).first()
-    except:
+    except Exception:
         employee = None
         today_attendance = None
     
@@ -230,6 +240,7 @@ def punch_in(request):
             
             if active_punch:
                 messages.error(request, 'Already punched in today. Please punch out first.')
+                return redirect('punch_attendance')
             else:
                
                 current_time = datetime.now().time()
@@ -360,7 +371,7 @@ def update_attendance(request, attendance_id):
         return redirect('home')
   
     try:
-        attendance = Attendance.objects.get(employee_id=attendance_id)
+        attendance = Attendance.objects.get(id=attendance_id)
         print(f"Updating attendance record ID: {attendance_id} for employee: {attendance.employee.name}")
         if request.method == 'POST':
             # Update fields based on form input
@@ -370,7 +381,7 @@ def update_attendance(request, attendance_id):
            
             attendance.save()
             messages.success(request, 'Attendance record updated successfully.')
-            return redirect('admin_attendance')
+            return redirect('admin_attendance_history')
         
         context = {
             'attendance': attendance,
@@ -420,6 +431,7 @@ def admin_attendance_view(request):
         employee_data.append({
             'employee': employee,
             'attendance_records': attendance_records,
+            'Month': attendance_records.first().date.strftime('%B %Y') if attendance_records.exists() else 'N/A',
             'total_days': total_days,
             'present_count': present_count,
             'absent_count': absent_count,
@@ -437,3 +449,16 @@ def admin_attendance_view(request):
     }
     
     return render(request, 'admin_attendance.html', context)
+def admin_attendance_history_view(request):
+    """Admin view to see attendance history of all employees"""
+    if not request.user.is_authenticated or request.user.role != 'Admin':
+        messages.error(request, 'You do not have permission to access this page.')
+        return redirect('login')
+    
+    attendance_records = Attendance.objects.all().order_by('-date')
+    
+    context = {
+        'attendance_records': attendance_records,
+    }
+    
+    return render(request, 'admin_attendance_history_view.html', context)

@@ -18,7 +18,8 @@ urlpatterns = [
     path("attendance_history/", views.attendance_history, name="attendance_history"),
     path("update_attendance/<int:attendance_id>/", views.update_attendance, name="update_attendance"),
     path("delete_attendance/<int:employee_id>/", views.delete_attendance_history, name="delete_attendance_history"),
-    path("admin_attendance/", views.admin_attendance_view, name="admin_attendance"),
+    path("admin_attendance/", views.admin_attendance_view, name="attendance_report"),
+    path("admin_attendance_history/", views.admin_attendance_history_view, name="admin_attendance_history"),
     path("", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
     

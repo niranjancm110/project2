@@ -336,44 +336,54 @@
 
     <div class="grid">
         <!-- Punch Card -->
-        <div class="punch-card">
-            <h2>Current Punch Status</h2>
+       <div class="punch-card">
+    <h2>Current Punch Status</h2>
+    <div class="stat-label" style="margin-bottom: 10px;">Today's Date</div>
+    <p id="todayDate" style="color: #111827; font-size: 16px; font-weight: 600; margin-bottom: 20px;">-</p>
+    
+    {% if today_attendance %}
+        {% if not today_attendance.end_time %}
+            <div class="status-badge status-active">🟢 PUNCHED IN</div>
+            <div class="stat-label" style="margin-top: 20px;">Punch In Time</div>
+            <div class="time-display">{{ today_attendance.start_time|time:"H:i" }}</div>
             
-            <div class="stat-label" style="margin-bottom: 10px;">Today's Date</div>
-            <p id="todayDate" style="color: #111827; font-size: 16px; font-weight: 600; margin-bottom: 20px;">-</p>
+            <div style="margin-top: 20px;">
+                <div class="stat-label">Time Elapsed</div>
+                <div class="time-display" id="timeElapsed" style="font-size: 32px;">--:--</div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-punch-out" onclick="openPunchOutModal()">🛑 Punch Out</button>
+            </div>
+        {% else %}
+            <div class="status-badge" style="background-color: #e5e7eb; color: #374151;">🏁 DAY COMPLETED</div>
+            <div style="margin-top: 20px;">
+                <p style="color: #16a34a; font-weight: 600;">You have successfully completed your shift.</p>
+                <div class="stat-label" style="margin-top: 10px;">Total Work: {{ today_attendance.work_hours }} hrs</div>
+            </div>
             
-            {% if today_attendance %}
-                <div class="status-badge status-active">🟢 PUNCHED IN</div>
-                <div class="stat-label" style="margin-top: 20px;">Punch In Time</div>
-                <div class="time-display">{{ today_attendance.start_time|time:"H:i" }}</div>
-                
-                <div style="margin-top: 20px;">
-                    <div class="stat-label">Current Time</div>
-                    <div class="time-display" id="currentTime">--:--</div>
-                </div>
-
-                <div style="margin-top: 20px;">
-                    <div class="stat-label">Time Elapsed</div>
-                    <div class="time-display" id="timeElapsed" style="font-size: 32px;">--:--</div>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn btn-punch-out" onclick="openPunchOutModal()">🛑 Punch Out</button>
-                    <a href="{% url 'employee_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
-                </div>
-            {% else %}
-                <div class="status-badge status-inactive">⭕ NOT PUNCHED IN</div>
-                <div style="margin-top: 20px;">
-                    <div class="stat-label">Next Action</div>
-                    <p style="color: #374151; margin: 10px 0; font-size: 16px;">Click Punch In to start your work day</p>
-                </div>
-
-                <div class="button-group">
-                    <button class="btn btn-punch-in" onclick="openPunchInModal()">✓ Punch In</button>
-                    <a href="{% url 'employee_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
-                </div>
-            {% endif %}
+            <div class="button-group">
+                <button class="btn btn-secondary" disabled style="cursor: not-allowed; opacity: 0.6;">
+                    ✓ Already Punched Out
+                </button>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="status-badge status-inactive">⭕ NOT PUNCHED IN</div>
+        <div style="margin-top: 20px;">
+            <div class="stat-label">Next Action</div>
+            <p style="color: #374151; margin: 10px 0; font-size: 16px;">Click Punch In to start your work day</p>
         </div>
+
+        <div class="button-group">
+            <button class="btn btn-punch-in" onclick="openPunchInModal()">✓ Punch In</button>
+        </div>
+    {% endif %}
+    
+    <div class="button-group">
+        <a href="{% url 'employee_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
 
         <!-- Stats Card -->
         <div class="stats-card">
@@ -422,7 +432,7 @@
 </div>
 
 <!-- Punch In Modal -->
-<div id="punchInModal" class="modal">
+<div id="punchInModal" class="modal"  style="display: none;" >
     <div class="modal-content">
         <div class="modal-header">✓ Punch In</div>
         <div class="modal-body">

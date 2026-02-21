@@ -43,7 +43,8 @@
         <a href="{% url 'home' %}">Dashboard</a>
         <a href="{% url 'add_employee' %}">Add Employee</a>
         <a href="{% url 'employee_list' %}">Employee List</a>
-        <a href="{% url 'admin_attendance' %}">Attendance</a>
+        <a href="{% url 'attendance_report' %}">Attendance Report</a>
+            <a href="{% url 'admin_attendance_history' %}">Attendance History</a>
         <a href="{% url 'logout' %}">Logout</a>
     </nav>
 </header>
@@ -51,13 +52,14 @@
 <div class="container">
     <h1><span class="title-badge">Add New Employee</span></h1>
     <p>Fill in the employee details below</p>
-    {% if form.errors %}
-        <div class="form-errors">
-            {{ form.errors }}
-        </div>
+    
+     {% if error %}
+        <div class="form-errors">{{ error }}</div>
     {% endif %}
+ 
 
     <form method="POST">
+  
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Save Employee</button>
